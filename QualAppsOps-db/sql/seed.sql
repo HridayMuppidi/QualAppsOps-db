@@ -27,10 +27,10 @@ VALUES
 -- CLIENTS (2)
 -- =============================================================
 
-INSERT INTO clients (id, company_name, industry, website, billing_address, payment_terms, status)
+INSERT INTO clients (id, company_name, industry, website, billing_address, status)
 VALUES
-    ('b2000000-0000-0000-0000-000000000001', 'Nexora Financial',  'Financial Services', 'https://nexorafinancial.com',  '500 Wall Street, New York, NY 10005', 'net_30', 'active'),
-    ('b2000000-0000-0000-0000-000000000002', 'HealthBridge Corp', 'Healthcare',         'https://healthbridgecorp.com', '1 Medical Plaza, Houston, TX 77001',  'net_45', 'active');
+    ('b2000000-0000-0000-0000-000000000001', 'Nexora Financial',  'Financial Services', 'https://nexorafinancial.com',  '500 Wall Street, New York, NY 10005', 'active'),
+    ('b2000000-0000-0000-0000-000000000002', 'HealthBridge Corp', 'Healthcare',         'https://healthbridgecorp.com', '1 Medical Plaza, Houston, TX 77001',  'active');
 
 -- Client contacts
 INSERT INTO client_contacts (client_id, first_name, last_name, email, phone, role, is_primary)

@@ -20,7 +20,6 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TYPE employment_type    AS ENUM ('permanent', 'part_time', 'intern', 'consultant');
 CREATE TYPE employee_status    AS ENUM ('active', 'bench', 'offboarded');
 CREATE TYPE address_type       AS ENUM ('home', 'office', 'mailing');
-CREATE TYPE payment_terms      AS ENUM ('net_30', 'net_45', 'net_60');
 CREATE TYPE client_status      AS ENUM ('active', 'inactive', 'prospect');
 CREATE TYPE vendor_type        AS ENUM ('staffing', 'software', 'both');
 CREATE TYPE vendor_status      AS ENUM ('active', 'inactive');
@@ -112,7 +111,6 @@ CREATE TABLE clients (
     industry        VARCHAR(100),
     website         VARCHAR(255),
     billing_address TEXT,
-    payment_terms   payment_terms NOT NULL DEFAULT 'net_30',
     status          client_status NOT NULL DEFAULT 'prospect',
     -- audit columns
     created_at      TIMESTAMPTZ   NOT NULL DEFAULT NOW(),

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QualAppsOps — Entity Relationship Diagram</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    header {
+      padding: 24px 40px 16px;
+      border-bottom: 1px solid #1e2330;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: #0f1117;
+      z-index: 100;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.3px;
+    }
+    header span {
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    /* ── Legend ─────────────────────────────────── */
+    .legend {
+      display: flex;
+      gap: 24px;
+      padding: 10px 40px;
+      background: #141720;
+      border-bottom: 1px solid #1e2330;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── Canvas ─────────────────────────────────── */
+    .canvas {
+      padding: 40px;
+      overflow: auto;
+    }
+
+    /* ── Cluster labels ──────────────────────────── */
+    .cluster-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 10px;
+      padding-left: 2px;
+    }
+
+    /* ── Grid layout ─────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 280px);
+      gap: 32px;
+      width: max-content;
+    }
+
+    /* ── Table card ──────────────────────────────── */
+    .table-card {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #1e2330;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    .table-header {
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .table-header .icon {
+      font-size: 0.9rem;
+    }
+    .table-body {
+      background: #141720;
+    }
+    .col-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 14px;
+      border-top: 1px solid #1a1f2e;
+      font-size: 0.72rem;
+      gap: 8px;
+    }
+    .col-row:hover {
+      background: #1a1f2e;
+    }
+    .col-name {
+      color: #cbd5e1;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      white-space: nowrap;
+    }
+    .col-name.pk  { color: #fbbf24; font-weight: 700; }
+    .col-name.fk  { color: #60a5fa; }
+    .col-name.audit { color: #475569; font-style: italic; }
+    .col-type {
+      color: #475569;
+      font-family: monospace;
+      font-size: 0.65rem;
+      white-space: nowrap;
+    }
+    .badge {
+      font-size: 0.58rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .badge-pk  { background: #78350f; color: #fbbf24; }
+    .badge-fk  { background: #1e3a5f; color: #60a5fa; }
+    .badge-uq  { background: #1a2e22; color: #34d399; }
+    .divider {
+      height: 1px;
+      background: #1e2330;
+      margin: 2px 0;
+    }
+
+    /* ── Colour themes per cluster ───────────────── */
+    .theme-employee .table-header { background: #1c2538; color: #93c5fd; }
+    .theme-client   .table-header { background: #1f2d22; color: #86efac; }
+    .theme-vendor   .table-header { background: #2d1f1f; color: #fca5a5; }
+    .theme-project  .table-header { background: #281e35; color: #c4b5fd; }
+    .theme-billing  .table-header { background: #2a2310; color: #fde68a; }
+    .theme-access   .table-header { background: #1a2530; color: #7dd3fc; }
+
+    .theme-employee { border-color: #1c2d4a; }
+    .theme-client   { border-color: #1a3320; }
+    .theme-vendor   { border-color: #3a1f1f; }
+    .theme-project  { border-color: #2e1f45; }
+    .theme-billing  { border-color: #3a2e10; }
+    .theme-access   { border-color: #1a2d3f; }
+
+    /* ── Relationships panel ─────────────────────── */
+    .rel-section {
+      margin-top: 48px;
+      border: 1px solid #1e2330;
+      border-radius: 12px;
+      overflow: hidden;
+      width: max-content;
+      min-width: 1180px;
+    }
+    .rel-header {
+      background: #141720;
+      padding: 12px 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #64748b;
+      border-bottom: 1px solid #1e2330;
+    }
+    .rel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: #0f1117;
+    }
+    .rel-group {
+      padding: 16px 20px;
+      border-right: 1px solid #1e2330;
+      border-bottom: 1px solid #1e2330;
+    }
+    .rel-group:nth-child(3n) { border-right: none; }
+    .rel-group-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .rel-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      font-family: monospace;
+    }
+    .rel-from { color: #e2e8f0; font-weight: 600; }
+    .rel-to   { color: #e2e8f0; font-weight: 600; }
+    .rel-card { color: #64748b; font-size: 0.65rem; }
+    .rel-label { color: #475569; font-style: italic; font-family: 'Segoe UI', sans-serif; font-size: 0.68rem; }
+
+    /* ── Footer ──────────────────────────────────── */
+    footer {
+      margin-top: 48px;
+      padding: 20px 40px;
+      border-top: 1px solid #1e2330;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      color: #475569;
+    }
+    footer a { color: #60a5fa; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⬡ QualAppsOps — Entity Relationship Diagram</h1>
+  <span>16 tables &nbsp;·&nbsp; 6 clusters &nbsp;·&nbsp; PostgreSQL 16 &nbsp;·&nbsp; Schema: QualAppsOps</span>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Primary Key (PK)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> Foreign Key (FK)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div> Unique</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#475569"></div> Audit column (created/updated by &amp; at)</div>
+  <div class="legend-item" style="margin-left:auto">
+    <span style="font-size:0.72rem; color:#475569">
+      ||──o{ = one-to-many &nbsp;|&nbsp; ||──o| = one-to-zero-or-one &nbsp;|&nbsp; }o──o{ = many-to-many (via junction)
+    </span>
+  </div>
+</div>
+
+<div class="canvas">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- ROW 1                                           -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="grid">
+
+    <!-- EMPLOYEES -->
+    <div>
+      <div class="cluster-label">👤 Employee</div>
+      <div class="table-card theme-employee">
+        <div class="table-header"><span class="icon">🗂</span> employees</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name">first_name</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">last_name</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">email</span><span class="col-type">VARCHAR(255)</span><span class="badge badge-uq">UQ</span></div>
+          <div class="col-row"><span class="col-name">phone</span><span class="col-type">VARCHAR(30)</span></div>
+          <div class="col-row"><span class="col-name">employment_type</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">department</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">job_title</span><span class="col-type">VARCHAR(150)</span></div>
+          <div class="col-row"><span class="col-name">start_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">end_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">pay_rate</span><span class="col-type">NUMERIC(10,2)</span></div>
+          <div class="col-row"><span class="col-name">bill_rate</span><span class="col-type">NUMERIC(10,2)</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADDRESSES -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-employee">
+        <div class="table-header"><span class="icon">🏠</span> addresses</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">employee_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">address_type</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">street_line_1</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">street_line_2</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">city</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">state</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">zip_code</span><span class="col-type">VARCHAR(20)</span></div>
+          <div class="col-row"><span class="col-name">country</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">is_primary</span><span class="col-type">BOOLEAN</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div>
+      <div class="cluster-label">🏢 Client</div>
+      <div class="table-card theme-client">
+        <div class="table-header"><span class="icon">🗂</span> clients</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name">company_name</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">industry</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">website</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">billing_address</span><span class="col-type">TEXT</span></div>
+          <div class="col-row"><span class="col-name">payment_terms</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENT CONTACTS -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-client">
+        <div class="table-header"><span class="icon">👥</span> client_contacts</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">client_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">first_name</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">last_name</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">email</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">phone</span><span class="col-type">VARCHAR(30)</span></div>
+          <div class="col-row"><span class="col-name">role</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">is_primary</span><span class="col-type">BOOLEAN</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid row 1 -->
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- ROW 2                                           -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="grid" style="margin-top:32px">
+
+    <!-- VENDORS -->
+    <div>
+      <div class="cluster-label">🔧 Vendor</div>
+      <div class="table-card theme-vendor">
+        <div class="table-header"><span class="icon">🗂</span> vendors</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name">company_name</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">vendor_type</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">contact_name</span><span class="col-type">VARCHAR(200)</span></div>
+          <div class="col-row"><span class="col-name">contact_email</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">contact_phone</span><span class="col-type">VARCHAR(30)</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDOR INVOICES -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-vendor">
+        <div class="table-header"><span class="icon">🧾</span> vendor_invoices</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">vendor_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">project_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">invoice_number</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">hours</span><span class="col-type">NUMERIC(7,2)</span></div>
+          <div class="col-row"><span class="col-name">rate</span><span class="col-type">NUMERIC(10,2)</span></div>
+          <div class="col-row"><span class="col-name">amount</span><span class="col-type">NUMERIC(12,2)</span></div>
+          <div class="col-row"><span class="col-name">invoice_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">due_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">paid_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">notes</span><span class="col-type">TEXT</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div>
+      <div class="cluster-label">📁 Project</div>
+      <div class="table-card theme-project">
+        <div class="table-header"><span class="icon">🗂</span> projects</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">client_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">name</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">description</span><span class="col-type">TEXT</span></div>
+          <div class="col-row"><span class="col-name">department</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">purchase_order_number</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">billing_type</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">budget</span><span class="col-type">NUMERIC(14,2)</span></div>
+          <div class="col-row"><span class="col-name">start_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">end_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROJECT ASSIGNMENTS -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-project">
+        <div class="table-header"><span class="icon">🔗</span> project_assignments</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">project_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">employee_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">role_on_project</span><span class="col-type">VARCHAR(150)</span></div>
+          <div class="col-row"><span class="col-name">bill_rate</span><span class="col-type">NUMERIC(10,2)</span></div>
+          <div class="col-row"><span class="col-name">allocation_%</span><span class="col-type">INTEGER</span></div>
+          <div class="col-row"><span class="col-name">start_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">end_date</span><span class="col-type">DATE</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid row 2 -->
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- ROW 3                                           -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="grid" style="margin-top:32px">
+
+    <!-- TIMESHEETS -->
+    <div>
+      <div class="cluster-label">⏱ Time Tracking</div>
+      <div class="table-card theme-project">
+        <div class="table-header"><span class="icon">🕐</span> timesheets</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">employee_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">project_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">hours</span><span class="col-type">NUMERIC(5,2)</span></div>
+          <div class="col-row"><span class="col-name">description</span><span class="col-type">TEXT</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">submitted_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="col-row"><span class="col-name fk">approved_by</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">approved_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELIVERABLES -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-project">
+        <div class="table-header"><span class="icon">📦</span> deliverables</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">project_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">assigned_to</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">name</span><span class="col-type">VARCHAR(255)</span></div>
+          <div class="col-row"><span class="col-name">description</span><span class="col-type">TEXT</span></div>
+          <div class="col-row"><span class="col-name">due_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">completed_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENT INVOICES -->
+    <div>
+      <div class="cluster-label">💰 Billing</div>
+      <div class="table-card theme-billing">
+        <div class="table-header"><span class="icon">🧾</span> client_invoices</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">client_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">project_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">invoice_number</span><span class="col-type">VARCHAR(100)</span><span class="badge badge-uq">UQ</span></div>
+          <div class="col-row"><span class="col-name">billing_period_start</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">billing_period_end</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">subtotal</span><span class="col-type">NUMERIC(14,2)</span></div>
+          <div class="col-row"><span class="col-name">tax</span><span class="col-type">NUMERIC(14,2)</span></div>
+          <div class="col-row"><span class="col-name">total</span><span class="col-type">NUMERIC(14,2)</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">sent_date</span><span class="col-type">DATE</span></div>
+          <div class="col-row"><span class="col-name">due_date / paid_date</span><span class="col-type">DATE</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENT INVOICE LINE ITEMS -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-billing">
+        <div class="table-header"><span class="icon">📋</span> client_invoice_line_items</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">invoice_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">employee_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">project_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">deliverable_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row" style="background:#1a1208">
+            <span class="col-name" style="color:#f59e0b; font-size:0.65rem">⚠ CHECK: project_id OR deliverable_id NOT NULL</span>
+          </div>
+          <div class="col-row"><span class="col-name">description</span><span class="col-type">TEXT</span></div>
+          <div class="col-row"><span class="col-name">hours</span><span class="col-type">NUMERIC(7,2)</span></div>
+          <div class="col-row"><span class="col-name">rate</span><span class="col-type">NUMERIC(10,2)</span></div>
+          <div class="col-row"><span class="col-name">amount</span><span class="col-type">NUMERIC(12,2)</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid row 3 -->
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- ROW 4                                           -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="grid" style="margin-top:32px">
+
+    <!-- USERS -->
+    <div>
+      <div class="cluster-label">🔐 Access Control</div>
+      <div class="table-card theme-access">
+        <div class="table-header"><span class="icon">👤</span> users</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">employee_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">email</span><span class="col-type">VARCHAR(255)</span><span class="badge badge-uq">UQ</span></div>
+          <div class="col-row"><span class="col-name">azure_ad_object_id</span><span class="col-type">VARCHAR(255)</span><span class="badge badge-uq">UQ</span></div>
+          <div class="col-row"><span class="col-name">status</span><span class="col-type">ENUM</span></div>
+          <div class="col-row"><span class="col-name">last_login</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROLES -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-access">
+        <div class="table-header"><span class="icon">🎭</span> roles</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name">role_name</span><span class="col-type">ENUM</span><span class="badge badge-uq">UQ</span></div>
+          <div class="col-row"><span class="col-name">description</span><span class="col-type">TEXT</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER ROLES -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-access">
+        <div class="table-header"><span class="icon">🔗</span> user_roles</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">user_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name fk">role_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">assigned_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="col-row"><span class="col-name fk">assigned_by</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERMISSIONS -->
+    <div>
+      <div class="cluster-label">&nbsp;</div>
+      <div class="table-card theme-access">
+        <div class="table-header"><span class="icon">🔑</span> permissions</div>
+        <div class="table-body">
+          <div class="col-row"><span class="col-name pk">id</span><span class="col-type">UUID</span><span class="badge badge-pk">PK</span></div>
+          <div class="col-row"><span class="col-name fk">role_id</span><span class="col-type">UUID</span><span class="badge badge-fk">FK</span></div>
+          <div class="col-row"><span class="col-name">resource</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="col-row"><span class="col-name">action</span><span class="col-type">ENUM</span></div>
+          <div class="divider"></div>
+          <div class="col-row"><span class="col-name audit">created_at / created_by</span><span class="col-type">audit</span></div>
+          <div class="col-row"><span class="col-name audit">updated_at / updated_by</span><span class="col-type">audit</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid row 4 -->
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- RELATIONSHIPS                                   -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="rel-section">
+    <div class="rel-header">Relationships</div>
+    <div class="rel-grid">
+
+      <div class="rel-group">
+        <div class="rel-group-title" style="color:#93c5fd">👤 Employee</div>
+        <div class="rel-row"><span class="rel-from">employees</span><span class="rel-card">||──o{</span><span class="rel-to">addresses</span><span class="rel-label">has</span></div>
+        <div class="rel-row"><span class="rel-from">employees</span><span class="rel-card">||──o{</span><span class="rel-to">project_assignments</span><span class="rel-label">assigned to</span></div>
+        <div class="rel-row"><span class="rel-from">employees</span><span class="rel-card">||──o{</span><span class="rel-to">timesheets</span><span class="rel-label">logs</span></div>
+        <div class="rel-row"><span class="rel-from">employees</span><span class="rel-card">||──o|</span><span class="rel-to">timesheets.approved_by</span><span class="rel-label">approves</span></div>
+        <div class="rel-row"><span class="rel-from">employees</span><span class="rel-card">||──o{</span><span class="rel-to">deliverables</span><span class="rel-label">assigned to</span></div>
+        <div class="rel-row"><span class="rel-from">employees</span><span class="rel-card">||──o|</span><span class="rel-to">users</span><span class="rel-label">logs in as</span></div>
+        <div class="rel-row"><span class="rel-from">employees</span><span class="rel-card">||──o{</span><span class="rel-to">client_invoice_line_items</span><span class="rel-label">appears on</span></div>
+      </div>
+
+      <div class="rel-group">
+        <div class="rel-group-title" style="color:#86efac">🏢 Client &amp; Vendor</div>
+        <div class="rel-row"><span class="rel-from">clients</span><span class="rel-card">||──o{</span><span class="rel-to">client_contacts</span><span class="rel-label">has</span></div>
+        <div class="rel-row"><span class="rel-from">clients</span><span class="rel-card">||──o{</span><span class="rel-to">projects</span><span class="rel-label">sponsors</span></div>
+        <div class="rel-row"><span class="rel-from">clients</span><span class="rel-card">||──o{</span><span class="rel-to">client_invoices</span><span class="rel-label">billed via</span></div>
+        <div class="rel-row" style="margin-top:8px"><span class="rel-from">vendors</span><span class="rel-card">||──o{</span><span class="rel-to">vendor_invoices</span><span class="rel-label">bills via</span></div>
+        <div class="rel-row"><span class="rel-from">projects</span><span class="rel-card">||──o{</span><span class="rel-to">vendor_invoices</span><span class="rel-label">linked to</span></div>
+      </div>
+
+      <div class="rel-group">
+        <div class="rel-group-title" style="color:#c4b5fd">📁 Project</div>
+        <div class="rel-row"><span class="rel-from">projects</span><span class="rel-card">||──o{</span><span class="rel-to">project_assignments</span><span class="rel-label">staffed via</span></div>
+        <div class="rel-row"><span class="rel-from">projects</span><span class="rel-card">||──o{</span><span class="rel-to">timesheets</span><span class="rel-label">logged against</span></div>
+        <div class="rel-row"><span class="rel-from">projects</span><span class="rel-card">||──o{</span><span class="rel-to">deliverables</span><span class="rel-label">contains</span></div>
+        <div class="rel-row"><span class="rel-from">projects</span><span class="rel-card">||──o{</span><span class="rel-to">client_invoices</span><span class="rel-label">generates</span></div>
+        <div class="rel-row"><span class="rel-from">projects</span><span class="rel-card">||──o{</span><span class="rel-to">client_invoice_line_items</span><span class="rel-label">scoped to</span></div>
+      </div>
+
+      <div class="rel-group">
+        <div class="rel-group-title" style="color:#fde68a">💰 Billing</div>
+        <div class="rel-row"><span class="rel-from">client_invoices</span><span class="rel-card">||──o{</span><span class="rel-to">client_invoice_line_items</span><span class="rel-label">broken into</span></div>
+        <div class="rel-row"><span class="rel-from">deliverables</span><span class="rel-card">||──o{</span><span class="rel-to">client_invoice_line_items</span><span class="rel-label">scoped to</span></div>
+        <div class="rel-row" style="font-size:0.65rem; color:#78716c; margin-top:6px">⚠ Each line item must reference<br>project_id OR deliverable_id (CHECK constraint)</div>
+      </div>
+
+      <div class="rel-group">
+        <div class="rel-group-title" style="color:#7dd3fc">🔐 Access Control</div>
+        <div class="rel-row"><span class="rel-from">users</span><span class="rel-card">||──o{</span><span class="rel-to">user_roles</span><span class="rel-label">holds</span></div>
+        <div class="rel-row"><span class="rel-from">roles</span><span class="rel-card">||──o{</span><span class="rel-to">user_roles</span><span class="rel-label">granted to</span></div>
+        <div class="rel-row"><span class="rel-from">roles</span><span class="rel-card">||──o{</span><span class="rel-to">permissions</span><span class="rel-label">grants</span></div>
+        <div class="rel-row"><span class="rel-from">users</span><span class="rel-card">||──o{</span><span class="rel-to">user_roles.assigned_by</span><span class="rel-label">assigned by</span></div>
+      </div>
+
+      <div class="rel-group">
+        <div class="rel-group-title" style="color:#475569">🕵 Audit Trail</div>
+        <div class="rel-row" style="color:#475569; font-size:0.68rem; font-family:'Segoe UI',sans-serif; line-height:1.6">
+          Every table has <strong style="color:#64748b">created_by</strong> and <strong style="color:#64748b">updated_by</strong>
+          columns that are nullable foreign keys back to <strong style="color:#94a3b8">users(id)</strong>.
+          This records which platform user created or last modified every row across all 16 tables.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /canvas -->
+
+<footer>
+  <div>
+    <strong>Hriday Muppidi</strong> &nbsp;·&nbsp;
+    <a href="https://github.com/HridayMuppidi" target="_blank">github.com/HridayMuppidi</a> &nbsp;·&nbsp;
+    <a href="https://linkedin.com/in/hriday-muppidi" target="_blank">linkedin.com/in/hriday-muppidi</a> &nbsp;·&nbsp;
+    Mentorship: Qual Labs
+  </div>
+  <div>QualAppsOps &nbsp;·&nbsp; PostgreSQL 16 &nbsp;·&nbsp; 16 tables &nbsp;·&nbsp; Schema: QualAppsOps</div>
+</footer>
+
+</body>
+</html>

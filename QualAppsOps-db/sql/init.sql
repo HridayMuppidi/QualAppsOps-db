@@ -296,7 +296,6 @@ CREATE TABLE deliverables (
     description    TEXT,
     due_date       DATE,
     completed_date DATE,
-    assigned_to    UUID               REFERENCES employees(id),
     status         deliverable_status NOT NULL DEFAULT 'pending',
     -- audit columns
     created_at     TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
@@ -305,7 +304,7 @@ CREATE TABLE deliverables (
     updated_by     UUID
 );
 
-COMMENT ON TABLE deliverables IS 'Trackable work products or milestones within a project, each assigned to an employee with a due date and completion status.';
+COMMENT ON TABLE deliverables IS 'Trackable work products or milestones within a project. Ownership is tracked at the project_assignments level, not directly on the deliverable.';
 
 CREATE INDEX idx_deliverables_project_id ON deliverables(project_id);
 

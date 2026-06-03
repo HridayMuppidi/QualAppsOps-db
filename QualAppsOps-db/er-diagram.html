@@ -567,6 +567,17 @@
 <!-- RELATIONSHIPS ══════════════════════════════════════════════ -->
 <div class="rel-section">
   <div class="rel-header">Relationships</div>
+  
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> Primary Key (PK)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> Foreign Key (FK)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#34d399"></div> Unique</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2d6a4f"></div> created_at / created_by</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1d4e89"></div> updated_at / updated_by</div>
+  <div class="legend-item" style="margin-left:auto; font-size:0.72rem; color:#475569">
+    ||──o{ one-to-many &nbsp;·&nbsp; ||──o| one-to-zero-or-one &nbsp;·&nbsp; }o──o{ many-to-many via junction
+  </div>
+</div>
   <div class="rel-grid">
 
     <div class="rel-group">

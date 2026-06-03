@@ -71,10 +71,10 @@ VALUES
 -- DELIVERABLES (2) — needed so line items can reference them
 -- =============================================================
 
-INSERT INTO deliverables (id, project_id, name, description, due_date, assigned_to, status)
+INSERT INTO deliverables (id, project_id, name, description, due_date, status)
 VALUES
-    ('de000000-0000-0000-0000-000000000001', 'd4000000-0000-0000-0000-000000000001', 'API Gateway v1',         'Design and implement the REST API gateway with auth middleware', '2024-05-31', 'a1000000-0000-0000-0000-000000000001', 'completed'),
-    ('de000000-0000-0000-0000-000000000002', 'd4000000-0000-0000-0000-000000000001', 'Data Pipeline — Phase 1','Kafka consumers and initial data pipeline wiring',              '2024-05-31', 'a1000000-0000-0000-0000-000000000002', 'in_progress');
+    ('de000000-0000-0000-0000-000000000001', 'd4000000-0000-0000-0000-000000000001', 'API Gateway v1',         'Design and implement the REST API gateway with auth middleware', '2024-05-31', 'completed'),
+    ('de000000-0000-0000-0000-000000000002', 'd4000000-0000-0000-0000-000000000001', 'Data Pipeline — Phase 1','Kafka consumers and initial data pipeline wiring',              '2024-05-31', 'in_progress');
 
 
 -- =============================================================

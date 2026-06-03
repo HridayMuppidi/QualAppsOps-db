@@ -4,7 +4,10 @@
       "Bash(git commit -m ' *)",
       "Bash(gh repo *)",
       "Bash(docker compose *)",
-      "Bash(start \"\" \"C:\\\\Users\\\\hrida\\\\Downloads\\\\Hriday\\\\Joe Uncle\\\\Exercises\\\\Database\\\\QualAppsOps-db\\\\er-diagram.html\")"
+      "Bash(start \"\" \"C:\\\\Users\\\\hrida\\\\Downloads\\\\Hriday\\\\Joe Uncle\\\\Exercises\\\\Database\\\\QualAppsOps-db\\\\er-diagram.html\")",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
